@@ -30,7 +30,7 @@ UI explained in Help.jpg
 
 ### Launch
 
-1. Run app `yarn start`
+1. Run app `yarn local:start`
 2. Open browser at `localhost:3000`
 
 ## Tests
