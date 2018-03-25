@@ -14,7 +14,7 @@ const EXPIRES_AT_KEY = 'expires_at'
 
 const CLIENT_DOMAIN = 'app91370810.eu.auth0.com'
 const CLIENT_ID = 'cFSebJZLEfamNMgN7oIP80JyaBBcSxz9'
-const REDIRECT = 'http://localhost:3000/callback'
+const REDIRECT = `${process.env.REACT_APP_URL}callback`
 const AUDIENCE = 'https://app91370810.eu.auth0.com/userinfo'
 const RESPONSE_TYPE = 'token id_token'
 const SCOPE = 'openid'

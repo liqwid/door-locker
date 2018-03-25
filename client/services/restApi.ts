@@ -8,11 +8,13 @@ import { Injectable } from 'react.di'
  * API abstraction layer
  */
 
+const BASE_URL = '/api'
+
 @Injectable
 export class RestClient {
   get({ url, headers }: AjaxRequest): Observable<AjaxResponse> {
     return Observable.ajax
-      .get(<string> url, headers)
+      .get(<string> BASE_URL + url, headers)
   }
   
   /**
@@ -20,7 +22,7 @@ export class RestClient {
    */
   post({ url, body, headers, progressSubscriber }: AjaxRequest): Observable<AjaxResponse> {
     return Observable.ajax({
-      url,
+      url: BASE_URL + url,
       body,
       headers,
       method: 'post',
@@ -31,11 +33,11 @@ export class RestClient {
   
   put({ url, body, headers }: AjaxRequest): Observable<AjaxResponse> {
     return Observable.ajax
-      .put(<string> url, body, headers)
+      .put(<string> BASE_URL + url, body, headers)
   }
   
   delete({ url, body, headers }: AjaxRequest): Observable<AjaxResponse> {
     return Observable.ajax
-      .delete(<string> url, headers)
+      .delete(<string> BASE_URL + url, headers)
   }
 }
