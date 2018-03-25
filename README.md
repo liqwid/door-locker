@@ -27,7 +27,7 @@ UI explained in Help.jpg
 1. Add a `.env` file in project root
 2. Add line `DATABASE_URL = postgres://user_name@password@0.0.0.0:5432/db_name`, where `user_name`, `password` and `db_name` are one used during db installation
 3. Add Line `REACT_APP_URL='http://localhost:3000/'`
-3. Add auth0 env variables `heroku config -s -a door-locker | grep 'AUTH0_CLIENT_ID\|AUTH0_CLIENT_SECRET\|AUTH0_DOMAIN' | tee -a .env`
+3. Add auth0 env variables `heroku config -s -a door-locker | grep 'AUTH0_CLIENT_ID\|AUTH0_CLIENT_SECRET\|AUTH0_DOMAIN\|REACT_APP_AUTH0_CLIENT_ID\|REACT_APP_AUTH0_CLIENT_SECRET\|REACT_APP_AUTH0_DOMAIN' | tee -a .env`
 
 ### Launch
 

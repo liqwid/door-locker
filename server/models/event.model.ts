@@ -1,6 +1,6 @@
 import { IsNumber, IsUUID, IsString, IsDefined } from 'class-validator'
 import { DATE, UUID, UUIDV4 } from 'sequelize'
-import { sequelize } from 'services/db.service'
+import { sequelize } from 'services/sequelize'
 import { UserORM } from 'models/user.model'
 import { DoorORM } from 'models/door.model'
 
@@ -21,7 +21,7 @@ export class Event {
   doorId: string
 }
 
-export const EventORM = sequelize.define('door', {
+export const EventORM = sequelize.define('event', {
   id: {
     type: UUID,
     defaultValue: UUIDV4,

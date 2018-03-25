@@ -12,8 +12,8 @@ const ID_TOKEN_KEY = 'id_token'
 const ACCESS_TOKEN_KEY = 'access_token'
 const EXPIRES_AT_KEY = 'expires_at'
 
-const CLIENT_DOMAIN = 'app91370810.eu.auth0.com'
-const CLIENT_ID = 'cFSebJZLEfamNMgN7oIP80JyaBBcSxz9'
+const CLIENT_DOMAIN = <string> process.env.REACT_APP_AUTH0_DOMAIN
+const CLIENT_ID = <string> process.env.REACT_APP_AUTH0_CLIENT_ID
 const REDIRECT = `${process.env.REACT_APP_URL}callback`
 const AUDIENCE = 'https://app91370810.eu.auth0.com/userinfo'
 const RESPONSE_TYPE = 'token id_token'

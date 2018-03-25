@@ -1,6 +1,6 @@
 import { IsDefined } from 'class-validator'
 import { STRING, UUID, UUIDV4 } from 'sequelize'
-import { sequelize } from 'services/db.service'
+import { sequelize } from 'services/sequelize'
 
 export class Door {
   id?: string

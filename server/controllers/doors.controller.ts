@@ -27,7 +27,7 @@ export class DoorsController {
     return logEvent(doorId, user.id)
   }
 
-  // @Authorized(MANAGE_DOORS)
+  @Authorized(MANAGE_DOORS)
   @Post()
   add(@Body() door: Door): PromiseLike<Door> {
     return addDoor(door)
