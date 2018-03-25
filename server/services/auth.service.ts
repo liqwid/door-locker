@@ -1,33 +1,49 @@
 import { Action } from 'routing-controllers'
-import { verify } from 'jsonwebtoken'
+import * as jwks from 'express-jwt'
+import { expressJwtSecret } from 'jwks-rsa'
 import { ManagementClient } from 'auth0'
 
-const AUTH_DOMAIN: string = <string> process.env.REACT_APP_AUTH0_DOMAIN
-const AUTH_SECRET: string = <string> process.env.REACT_APP_AUTH0_CLIENT_SECRET
+import { getUser } from 'services/users.service'
 
-const MANAGE_DOMAIN: string = <string> process.env.AUTH0_DOMAIN
-const MANAGE_SECRET: string = <string> process.env.AUTH0_CLIENT_SECRET
-const MANAGE_CLIENT_ID: string = <string> process.env.AUTH0_CLIENT_ID
+import { MANAGE_DOORS, MANAGE_USERS } from 'models/scopes.model'
+
+const AUTH_DOMAIN: string = <string> process.env.REACT_APP_AUTH0_DOMAIN
+const AUDIENCE: string = <string> process.env.REACT_APP_AUDIENCE
+
+const MANAGING_DOMAN: string = <string> process.env.AUTH0_DOMAIN
+const MANAGING_SECRET: string = <string> process.env.AUTH0_CLIENT_SECRET
+const MANAGING_CLIENT_ID: string = <string> process.env.AUTH0_CLIENT_ID
 
 const AUTH_OPTIONS = {
-  issuer: AUTH_DOMAIN,
-  audience: 'https://app-locker.heroku.com/',
+  issuer: `https://${AUTH_DOMAIN}/`,
+  audience: AUDIENCE,
   algorithms: ['RS256'],
+  secret: expressJwtSecret({
+    cache: true,
+    rateLimit: true,
+    jwksRequestsPerMinute: 5,
+    jwksUri: `https://${AUTH_DOMAIN}/.well-known/jwks.json`
+  })
 }
 
 export const managementClient = new ManagementClient({
-  domain: MANAGE_DOMAIN,
-  clientId: MANAGE_CLIENT_ID,
-  clientSecret: MANAGE_SECRET,
+  domain: MANAGING_DOMAN,
+  clientId: MANAGING_CLIENT_ID,
+  clientSecret: MANAGING_SECRET,
   scope: 'read:users update:users delete:users create:users',
 })
 
-export function checkAuthorization(action: Action, roles: string[]): Promise<boolean> {
+export function checkAuthorization(action: Action, scopes: string[]): Promise<boolean> {
   return new Promise((resolve, reject) => {
-    const token = action.request.headers.authorization
-
-    verify(token, AUTH_SECRET, AUTH_OPTIONS, (err, decoded) => {
+    jwks(AUTH_OPTIONS)(action.request, action.response, (err) => {
       if (err) resolve(false)
+
+      if (scopes.indexOf(MANAGE_USERS) > -1 || scopes.indexOf(MANAGE_DOORS) > -1) {
+        const userId = action.request.user.sub
+        getUser(userId)
+        .then(({ isAdmin }) => resolve(isAdmin))
+        return
+      }
       
       resolve(true)
     })

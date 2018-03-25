@@ -14,7 +14,7 @@ import { RestClient } from 'services/restApi'
 import { DoorService } from 'services/doors'
 import { UserService } from 'services/users'
 import { history } from 'services/history'
-import { AuthService, AUTH_STATUS, LOADING, AUTHENTICATED, UNAUTHENTICATED } from 'services/auth'
+import { AuthService, AUTH_STATUS, LOADING, AUTHENTICATED } from 'services/auth'
 
 import { Main } from 'containers/Main'
 import { Sidebar } from 'containers/Sidebar'
@@ -77,12 +77,6 @@ class App extends React.Component<AppProps, AppState> {
   
   render() {
     const { authStatus } = this.state
-    
-    // Redirects to login page
-    if (authStatus === UNAUTHENTICATED) {
-      this.auth.login()
-      return null
-    }
     
     return (
       <MuiThemeProvider theme={theme}>

@@ -3,7 +3,6 @@ import { Subject } from 'rxjs/Subject'
 import { BehaviorSubject } from 'rxjs/BehaviorSubject'
 import { AjaxResponse } from 'rxjs/observable/dom/AjaxObservable'
 import 'rxjs/add/observable/of'
-import 'rxjs/add/operator/do'
 import 'rxjs/add/operator/map'
 import 'rxjs/add/operator/catch'
 import 'rxjs/add/operator/mergeMapTo'
@@ -153,7 +152,6 @@ export abstract class CollectionService<T extends CollectionItem> {
     this.fetchHandle
     // switchMap drops previous rest requests
     .switchMap(() => this.restApi.get({ url: this.endPoint }))
-    .do(console.log)
     .map(({ response }: AjaxResponse) => ({
       status: SUCCESS,
       items: response

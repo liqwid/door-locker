@@ -8,16 +8,19 @@ import { logEvent } from 'services/events.service'
 
 @JsonController('/doors')
 export class DoorsController {
+  @Authorized()
   @Get()
   get(): PromiseLike<Door[]> {
     return getDoors()
   }
 
+  @Authorized()
   @Get('/:id')
   getDoor(@Param('id') id: string): PromiseLike<Door> {
     return getDoor(id)
   }
 
+  @Authorized()
   @Post('/open/:id')
   open(
     @CurrentUser() user: User,

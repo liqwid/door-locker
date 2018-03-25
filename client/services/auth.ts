@@ -15,7 +15,7 @@ const EXPIRES_AT_KEY = 'expires_at'
 const CLIENT_DOMAIN = <string> process.env.REACT_APP_AUTH0_DOMAIN
 const CLIENT_ID = <string> process.env.REACT_APP_AUTH0_CLIENT_ID
 const REDIRECT = `${process.env.REACT_APP_URL}callback`
-const AUDIENCE = 'https://app91370810.eu.auth0.com/userinfo'
+const AUDIENCE = <string> process.env.REACT_APP_AUDIENCE
 const RESPONSE_TYPE = 'token id_token'
 const SCOPE = 'openid'
 
@@ -32,7 +32,7 @@ export const UNAUTHENTICATED: UNAUTHENTICATED = 'unauthenticated'
 @Injectable
 export class AuthService {
   private authState: BehaviorSubject<AUTH_STATUS> = new BehaviorSubject(LOADING)
-  private accessTokenState: BehaviorSubject<string | null> = new BehaviorSubject(null)
+  private accessTokenState: BehaviorSubject<string> = new BehaviorSubject('')
   private tokenRenewalTimeout: number
   
   private auth0 = new auth0.WebAuth({
@@ -70,8 +70,10 @@ export class AuthService {
     history.replace(HOME_ROUTE)
     
     this.authState.next(UNAUTHENTICATED)
+    this.accessTokenState.next('')
 
     clearTimeout(this.tokenRenewalTimeout)
+    this.login()
   }
 
   public login = () => {
@@ -106,10 +108,10 @@ export class AuthService {
   private updateAuthState() {
     this.scheduleRenewal()
 
-    const accessToken = localStorage.getItem(ACCESS_TOKEN_KEY)
+    const accessToken = localStorage.getItem(ACCESS_TOKEN_KEY) || ''
     
     this.authState.next(AUTHENTICATED)
-    this.accessTokenState.next(<string> accessToken)
+    this.accessTokenState.next(accessToken)
   }
 
   private scheduleRenewal() {

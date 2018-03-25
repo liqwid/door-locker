@@ -11,7 +11,7 @@ import { User as AuthUser } from 'auth0'
  * Local db contains user privileges for auth db users
  */
 export async function syncUsers(): Promise<{}> {
-  const remainingUsersInAuthDb: AuthUser[] = <AuthUser[]> await managementClient.getUsers().catch(console.log)
+  const remainingUsersInAuthDb: AuthUser[] = <AuthUser[]> await managementClient.getUsers()
 
   await UserORM.sync()
   const usersInDb = await UserORM.findAll()
