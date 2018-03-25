@@ -1,4 +1,9 @@
 import * as React from 'react'
+
+import { withRouter, RouteComponentProps } from 'react-router-dom'
+
+import { Inject } from 'react.di'
+
 import BottomNavigation, { BottomNavigationAction } from 'material-ui/BottomNavigation'
 import Lock from 'material-ui-icons/Lock'
 import Person from 'material-ui-icons/Person'
@@ -6,31 +11,39 @@ import People from 'material-ui-icons/People'
 import ExitToApp from 'material-ui-icons/ExitToApp'
 import AssignmentLate from 'material-ui-icons/AssignmentLate'
 
-interface BottomNavProps {}
-interface BottomNavState {
-  selected: string
+import { AuthService } from 'services/auth'
+
+interface BottomNavProps {
+  isAdmin: boolean
 }
+interface BottomNavState {}
 
-export class BottomNav extends React.Component<BottomNavProps, BottomNavState> {
-  state = {
-    selected: 'recents',
-  }
-
+export class BottomNavComponent extends React.Component<BottomNavProps & RouteComponentProps<{}>, BottomNavState> {
+  @Inject auth: AuthService
+  
   handleChange = (event: React.ChangeEvent<{}>, selected: string) => {
-    this.setState({ selected })
+    if (selected === 'logout') return this.auth.logout()
+    this.props.history.push(`/${selected}`)
   }
 
   render() {
-    const { selected } = this.state
+    const { isAdmin, location } = this.props
+    const selected = location.pathname.replace(/\/([^\/]+)(\/|$)/, ($0, $1) => $1)
 
     return (
       <BottomNavigation value={selected} onChange={this.handleChange}>
-        <BottomNavigationAction style={{ minWidth: 0 }} label='Acount' value='account' icon={<Person />} />
-        <BottomNavigationAction style={{ minWidth: 0 }} label='Users' value='users' icon={<People />} />
-        <BottomNavigationAction style={{ minWidth: 0 }} label='Doors' value='doors' icon={<Lock />} />
-        <BottomNavigationAction style={{ minWidth: 0 }} label='Events' value='events' icon={<AssignmentLate />} />
-        <BottomNavigationAction style={{ minWidth: 0 }} label='' value='signOut' icon={<ExitToApp />} />
+        <BottomNavigationAction style={{ minWidth: 0 }} label='Acount' value='account' icon={<Person />}/>
+        { isAdmin &&
+          <BottomNavigationAction style={{ minWidth: 0 }} label='Users' value='users' icon={<People />}/>
+        }
+        <BottomNavigationAction style={{ minWidth: 0 }} label='Doors' value='doors' icon={<Lock />}/>
+        { isAdmin &&
+          <BottomNavigationAction style={{ minWidth: 0 }} label='Events' value='events' icon={<AssignmentLate />}/>
+        }
+        <BottomNavigationAction style={{ minWidth: 0 }} label='' value='logout' icon={<ExitToApp />}/>
       </BottomNavigation>
     )
   }
 }
+
+export const BottomNav = withRouter(BottomNavComponent)
