@@ -1,3 +1,12 @@
 export interface User {
-  id?: string
+  username: string
+  email: string
+  id: string
+}
+
+export interface UserData {
+  username: string
+  email: string
+  password: string
+  doors: string[]
 }

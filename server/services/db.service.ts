@@ -16,6 +16,7 @@ export function syncWithDb(): Promise<{}> {
   return Promise.all([
     syncUsers(),
     syncDoors(),
+    UserDoor.sync()
   ])
   .then(syncEvents)
 }

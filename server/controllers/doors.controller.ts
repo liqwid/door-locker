@@ -2,7 +2,7 @@ import { JsonController, Get, Post, Put, Delete, Param, Body, Authorized, Req } 
 import { Request } from 'express'
 import { Door } from 'models/door.model'
 import { Event } from 'models/event.model'
-import { MANAGE_DOORS } from 'models/scopes.model'
+import { MANAGE_DOORS, MANAGE_USERS } from 'models/scopes.model'
 import { getDoors, getDoor, addDoor, updateDoor, deleteDoor } from 'services/doors.service'
 import { logEvent } from 'services/events.service'
 
@@ -20,7 +20,7 @@ export class DoorsController {
     return getDoor(id)
   }
 
-  @Authorized()
+  @Authorized(MANAGE_USERS)
   @Post('/open/:id')
   open(
     @Req() request: Request,
@@ -30,13 +30,13 @@ export class DoorsController {
     return logEvent(doorId, userId)
   }
 
-  @Authorized(MANAGE_DOORS)
+  @Authorized([MANAGE_DOORS, MANAGE_USERS])
   @Post()
   add(@Body() door: Door): PromiseLike<Door> {
     return addDoor(door)
   }
 
-  @Authorized(MANAGE_DOORS)
+  @Authorized([MANAGE_DOORS, MANAGE_USERS])
   @Put('/:id')
   update(
     @Param('id') id: string,
@@ -45,7 +45,7 @@ export class DoorsController {
     return updateDoor(id, door)
   }
 
-  @Authorized(MANAGE_DOORS)
+  @Authorized([MANAGE_DOORS, MANAGE_USERS])
   @Delete('/:id')
   delete(@Param('id') id: string): PromiseLike<{}> {
     return deleteDoor(id)

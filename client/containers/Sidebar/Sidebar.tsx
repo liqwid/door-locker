@@ -4,6 +4,7 @@ import { Route, Switch } from 'react-router'
 import { BottomNav } from 'components/BottomNav'
 import { Menu } from 'components/Menu'
 import { DoorList } from 'containers/DoorList'
+import { UserList } from 'containers/UserList'
 
 const Empty = () => <div />
 
@@ -20,7 +21,7 @@ export const Sidebar = ({ isAdmin, isTablet }: SidebarProps) => (
       <Route path='/account' component={isTablet ? /*UserForm*/Empty : Empty}/>
       {isAdmin && <Route path='/doors/:id/edit' component={isTablet ? /*DoorForm*/Empty : DoorList}/>}
       {isAdmin && <Route path='/doors/add' component={isTablet ? /*DoorForm*/Empty : DoorList}/>}
-      {isAdmin && <Route path='/users' exact={true} component={/*UserList*/Empty}/>}
+      {isAdmin && <Route path='/users' exact={true} component={UserList}/>}
       {isAdmin && <Route path='/users/:id/edit' component={isTablet ? /*UserForm*/Empty : Empty}/>}
       {isAdmin && <Route path='/users/add' component={isTablet ? /*UserForm*/Empty : Empty}/>}
       {isAdmin && <Route path='/events' component={Empty}/>}

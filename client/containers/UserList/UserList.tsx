@@ -10,74 +10,74 @@ import List, { ListItem, ListItemText } from 'material-ui/List'
 import Divider from 'material-ui/Divider'
 
 import { SUCCESS, ERROR, LOADING, FetchMessage } from 'services/collection'
-import { DoorService } from 'services/doors'
-import { Door } from 'models/door'
+import { UserService } from 'services/users'
+import { User } from 'models/user'
 import { Loader } from 'components/Loader'
 
-export const ERROR_TEXT: string = 'Failed to load doors. Try again'
+export const ERROR_TEXT: string = 'Failed to load users. Try again'
 
-export interface DoorListProps {
+export interface UserListProps {
   style?: {}
 }
 
-export interface DoorListState {
-  doors: Door[]
+export interface UserListState {
+  users: User[]
   loading: boolean
   error: boolean
 }
 
-export class DoorList extends React.Component<DoorListProps, DoorListState> {
-  @Inject doorService: DoorService
+export class UserList extends React.Component<UserListProps, UserListState> {
+  @Inject userService: UserService
 
   unsubscribe$: Subject<void>
   state = {
-    doors: [],
+    users: [],
     loading: true,
     error: false
   }
 
-  constructor(props: DoorListProps) {
+  constructor(props: UserListProps) {
     super(props)
   }
 
   componentDidMount() {
     this.unsubscribe$ = new Subject()
-    this.connectDoorService()
+    this.connectUserService()
   }
 
   componentWillUnmount() {
     this.unsubscribe$.next()
   }
 
-  connectDoorService() {
-    this.doorService.getDataStream()
+  connectUserService() {
+    this.userService.getDataStream()
     // Auto unsubscribe when this.unsubscribe$.next is called
     .takeUntil(this.unsubscribe$)
-    .subscribe(({ status, items }: FetchMessage<Door>) => {
+    .subscribe(({ status, items }: FetchMessage<User>) => {
       if (status === LOADING) {
-        this.setState({ loading: true, error: false, doors: [] })
+        this.setState({ loading: true, error: false, users: [] })
         return
       }
       if (status === ERROR) {
-        this.setState({ loading: false, error: true, doors: [] })
+        this.setState({ loading: false, error: true, users: [] })
         return
       }
       if (status === SUCCESS) {
-        this.setState({ loading: false, error: false, doors: items })
+        this.setState({ loading: false, error: false, users: items })
         return
       }
     })
 
-    this.doorService.fetchItems()
+    this.userService.fetchItems()
   }
 
   render() {
-    const { doors, loading, error } = this.state
+    const { users, loading, error } = this.state
 
     return (
       <List component='nav'>
         {
-          error && <ListItem button={true} onClick={this.doorService.fetchItems}>
+          error && <ListItem button={true} onClick={this.userService.fetchItems}>
             <ListItemText primary={ERROR_TEXT} />
             <Divider />
           </ListItem>
@@ -86,9 +86,9 @@ export class DoorList extends React.Component<DoorListProps, DoorListState> {
           loading && <Loader />
         }
         {
-          doors.length > 0 && doors.map(({ name, id }: Door) =>
+          users.length > 0 && users.map(({ username, id }: User) =>
             <ListItem key={id} button={true}>
-              <ListItemText primary={name} />
+              <ListItemText primary={username} />
               <Divider />
             </ListItem>
           )

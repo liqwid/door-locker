@@ -4,6 +4,7 @@ import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles'
 import CssBaseline from 'material-ui/CssBaseline'
 import { Router, Route, Switch, Redirect } from 'react-router'
 const Media = require('react-media').default
+import styled from 'styled-components'
 
 import { Subject } from 'rxjs/Subject'
 
@@ -18,7 +19,7 @@ import { AuthService, AUTH_STATUS, LOADING, AUTHENTICATED } from 'services/auth'
 
 import { Main } from 'containers/Main'
 import { Sidebar } from 'containers/Sidebar'
-import { AuthLoader } from 'components/AuthLoader'
+import { Loader } from 'components/Loader'
 
 const theme = createMuiTheme({
   typography: {
@@ -46,6 +47,10 @@ interface AppProps {}
 interface AppState {
   authStatus: AUTH_STATUS
 }
+
+const Layout = styled.div`
+  height: 100vh;
+`
 
 @Module({
   providers: [
@@ -81,7 +86,7 @@ class App extends React.Component<AppProps, AppState> {
     return (
       <MuiThemeProvider theme={theme}>
         <CssBaseline />
-        { authStatus === LOADING && <AuthLoader/> }
+        { authStatus === LOADING && <Loader/> }
         { authStatus === AUTHENTICATED && <Router history={history}>
           <Switch>
             <Route
@@ -89,7 +94,7 @@ class App extends React.Component<AppProps, AppState> {
               render={(props) => (
                 <Media query={`(max-width: ${TABLET_VERTICAL})`}>
                   {(matches: boolean) => (
-                    <div>
+                    <Layout>
                       {/**
                         *  Side-menu for desktop/Only screen for mobile
                         */
@@ -100,7 +105,7 @@ class App extends React.Component<AppProps, AppState> {
                         */
                         !matches &&  <Main isAdmin={true} />
                       }
-                    </div>
+                    </Layout>
                   )}
                 </Media>
               )}
