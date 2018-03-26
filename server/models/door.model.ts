@@ -18,6 +18,7 @@ export const DoorORM = sequelize.define('door', {
   
   name: {
     type: STRING,
-    allowNull: false
+    allowNull: false,
+    unique: true
   }
 })

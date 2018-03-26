@@ -1,8 +1,6 @@
 import { IsNumber, IsUUID, IsString, IsDefined } from 'class-validator'
 import { DATE, UUID, UUIDV4 } from 'sequelize'
 import { sequelize } from 'services/sequelize'
-import { UserORM } from 'models/user.model'
-import { DoorORM } from 'models/door.model'
 
 export class Event {
   @IsUUID()
@@ -33,6 +31,3 @@ export const EventORM = sequelize.define('event', {
     allowNull: false
   }
 })
-
-EventORM.belongsTo(DoorORM)
-EventORM.belongsTo(UserORM)

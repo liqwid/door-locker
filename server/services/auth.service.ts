@@ -36,12 +36,14 @@ export const managementClient = new ManagementClient({
 export function checkAuthorization(action: Action, scopes: string[]): Promise<boolean> {
   return new Promise((resolve, reject) => {
     jwks(AUTH_OPTIONS)(action.request, action.response, (err) => {
-      if (err) resolve(false)
+      if (err) return resolve(false)
 
       if (scopes.indexOf(MANAGE_USERS) > -1 || scopes.indexOf(MANAGE_DOORS) > -1) {
         const userId = action.request.user.sub
         getUser(userId)
-        .then(({ isAdmin }) => resolve(isAdmin))
+        .then(({ isAdmin }) => {
+          resolve(isAdmin)
+        })
         return
       }
       

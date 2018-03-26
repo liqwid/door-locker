@@ -1,6 +1,6 @@
-import { JsonController, Get, Post, Put, Delete, Param, Body, Authorized, CurrentUser } from 'routing-controllers'
+import { JsonController, Get, Post, Put, Delete, Param, Body, Authorized, Req } from 'routing-controllers'
+import { Request } from 'express'
 import { Door } from 'models/door.model'
-import { User } from 'models/user.model'
 import { Event } from 'models/event.model'
 import { MANAGE_DOORS } from 'models/scopes.model'
 import { getDoors, getDoor, addDoor, updateDoor, deleteDoor } from 'services/doors.service'
@@ -23,11 +23,11 @@ export class DoorsController {
   @Authorized()
   @Post('/open/:id')
   open(
-    @CurrentUser() user: User,
+    @Req() request: Request,
     @Param('id') doorId: string
   ): PromiseLike<Event> {
-    // TODO: add door access check
-    return logEvent(doorId, user.id)
+    const userId = request.user.sub
+    return logEvent(doorId, userId)
   }
 
   @Authorized(MANAGE_DOORS)

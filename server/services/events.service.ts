@@ -1,16 +1,18 @@
 import { Event, EventORM } from 'models/event.model'
+import { extractRawData } from 'utils/orm'
 
-function getDoorOpenEvent(doorId: string, userId: string): Event {
-  return {
+export function getEvents(): PromiseLike<Event[]> {
+  return EventORM.findAll()
+  .then((eventInstances) => eventInstances.map(extractRawData))
+}
+
+export function logEvent(doorId: string, userId: string): PromiseLike<Event> {
+  return EventORM.create({
     type: 'door opened',
     date: Date.now(),
     doorId,
     userId,
-  }
-}
-
-export function logEvent(doorId: string, userId: string): PromiseLike<Event> {
-  return EventORM.create(getDoorOpenEvent(doorId, userId))
+  })
 }
 
 export function sync(): PromiseLike<{}> {
