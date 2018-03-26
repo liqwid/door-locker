@@ -92,7 +92,7 @@ class App extends React.Component<AppProps, AppState> {
             <Route
               path='/'
               render={(props) => (
-                <Media query={`(max-width: ${TABLET_VERTICAL})`}>
+                <Media query={`(max-width: ${TABLET_VERTICAL}px)`}>
                   {(matches: boolean) => (
                     <Layout>
                       {/**

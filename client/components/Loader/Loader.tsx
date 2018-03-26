@@ -4,7 +4,8 @@ import styled from 'styled-components'
 
 export const Loader = styled(CircularProgress)`
   position: absolute;
-  top: 88px;
+  top: 50%;
   left: 50%;
   transform: translateX(-50%);
+  transform: translateY(-50%);
 `

@@ -13,6 +13,7 @@ import { SUCCESS, ERROR, LOADING, FetchMessage } from 'services/collection'
 import { DoorService } from 'services/doors'
 import { Door } from 'models/door'
 import { Loader } from 'components/Loader'
+import { Link } from 'components/Link'
 
 export const ERROR_TEXT: string = 'Failed to load doors. Try again'
 
@@ -87,10 +88,12 @@ export class DoorList extends React.Component<DoorListProps, DoorListState> {
         }
         {
           doors.length > 0 && doors.map(({ name, id }: Door) =>
-            <ListItem key={id} button={true}>
-              <ListItemText primary={name} />
-              <Divider />
-            </ListItem>
+            <Link to={`/doors/${id}/show`} key={id}>
+              <ListItem button={true}>
+                <ListItemText primary={name} />
+                <Divider />
+              </ListItem>
+            </Link>
           )
         }
       </List>

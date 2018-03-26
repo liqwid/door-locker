@@ -37,8 +37,9 @@ export interface FetchMessage<T extends CollectionItem> {
 
 @Injectable
 export abstract class CollectionService<T extends CollectionItem> {
+  public fetchedOnce: boolean = false
   protected endPoint: string
-  private dataState: BehaviorSubject<FetchMessage<T>> = new BehaviorSubject({
+  protected dataState: BehaviorSubject<FetchMessage<T>> = new BehaviorSubject({
     status: LOADING,
     items: []
   })
@@ -55,6 +56,7 @@ export abstract class CollectionService<T extends CollectionItem> {
    */
   public fetchItems = () => {
     this.fetchHandle.next()
+    if (!this.fetchedOnce) this.fetchedOnce = true
   }
 
   /**
@@ -147,7 +149,7 @@ export abstract class CollectionService<T extends CollectionItem> {
    * Fetch stream is controlled by fetch handle:
    * this.fetchHandle.next() launches fetch
    */
-  private initFetchStream() {
+  protected initFetchStream() {
     // Performs a fetch upon fetchHandle activation
     this.fetchHandle
     // switchMap drops previous rest requests
@@ -161,6 +163,25 @@ export abstract class CollectionService<T extends CollectionItem> {
       ...this.dataState.getValue()
     }))
     .subscribe(this.updateData)
+  }
+
+  protected updateItemParam(id: string, param: string, value: any) {
+    const items = this.dataState.getValue().items
+    const currentItemIndex = items.findIndex((item) => item.id === id)
+    const currentItem: CollectionItem = items[currentItemIndex]
+    const newItems = <T[]> [
+      ...items.slice(0, currentItemIndex),
+      {
+        ...currentItem,
+        [param]: value
+      },
+      ...items.slice(currentItemIndex + 1),
+    ]
+
+    this.dataState.next({
+      status: SUCCESS,
+      items: newItems
+    })
   }
 
   private updateData = (data: FetchMessage<T>) => this.dataState.next(data)

@@ -13,6 +13,7 @@ import { SUCCESS, ERROR, LOADING, FetchMessage } from 'services/collection'
 import { UserService } from 'services/users'
 import { User } from 'models/user'
 import { Loader } from 'components/Loader'
+import { Link } from 'components/Link'
 
 export const ERROR_TEXT: string = 'Failed to load users. Try again'
 
@@ -87,10 +88,12 @@ export class UserList extends React.Component<UserListProps, UserListState> {
         }
         {
           users.length > 0 && users.map(({ username, id }: User) =>
-            <ListItem key={id} button={true}>
-              <ListItemText primary={username} />
-              <Divider />
-            </ListItem>
+            <Link to={`/users/${id}/edit`} key={id}>
+              <ListItem button={true}>
+                <ListItemText primary={username} />
+                <Divider />
+              </ListItem>
+            </Link>
           )
         }
       </List>

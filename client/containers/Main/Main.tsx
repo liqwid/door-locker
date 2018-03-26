@@ -2,6 +2,8 @@ import * as React from 'react'
 import styled from 'styled-components'
 import { Route, Switch } from 'react-router'
 
+import { DoorPage } from 'containers/Door'
+
 const Empty = () => <div />
 const MainWrapper = styled.div`
 
@@ -15,7 +17,7 @@ export const Main = ({ isAdmin }: MainProps) => (
   <MainWrapper>
     <Switch>
       <Route path='/doors' component={Empty}/>
-      <Route path='/doors/:id' component={Empty}/>
+      <Route path='/doors/:id/show' component={DoorPage}/>
       <Route path='/account' component={/*UserForm*/Empty}/>
       {isAdmin && <Route path='/doors/:id/edit' component={/*DoorForm*/Empty}/>}
       {isAdmin && <Route path='/doors/add' component={/*DoorForm*/Empty}/>}
