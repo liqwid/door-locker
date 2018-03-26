@@ -76,7 +76,7 @@ export class DoorList extends React.Component<DoorListProps, DoorListState> {
     const { doors, loading, error } = this.state
 
     return (
-      <List component='nav'>
+      <List style={{overflow: 'auto'}} component='nav'>
         {
           error && <ListItem button={true} onClick={this.doorService.fetchItems}>
             <ListItemText primary={ERROR_TEXT} />

@@ -76,7 +76,7 @@ export class UserList extends React.Component<UserListProps, UserListState> {
     const { users, loading, error } = this.state
 
     return (
-      <List component='nav'>
+      <List style={{overflow: 'auto'}} component='nav'>
         {
           error && <ListItem button={true} onClick={this.userService.fetchItems}>
             <ListItemText primary={ERROR_TEXT} />

@@ -1,6 +1,7 @@
 import { IsNumber, IsUUID, IsString, IsDefined } from 'class-validator'
-import { DATE, UUID, UUIDV4 } from 'sequelize'
+import { DATE, UUID, UUIDV4, STRING } from 'sequelize'
 import { sequelize } from 'services/sequelize'
+import { Door } from 'models/door.model'
 
 export class Event {
   @IsUUID()
@@ -17,6 +18,9 @@ export class Event {
 
   @IsUUID()
   doorId: string
+
+  username?: string
+  door?: Door
 }
 
 export const EventORM = sequelize.define('event', {
@@ -28,6 +32,11 @@ export const EventORM = sequelize.define('event', {
   
   date: {
     type: DATE,
+    allowNull: false
+  },
+
+  type: {
+    type: STRING,
     allowNull: false
   }
 })

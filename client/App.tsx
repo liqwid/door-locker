@@ -20,6 +20,7 @@ import { AuthService, AUTH_STATUS, LOADING, AUTHENTICATED } from 'services/auth'
 import { Main } from 'containers/Main'
 import { Sidebar } from 'containers/Sidebar'
 import { Loader } from 'components/Loader'
+import { EventService } from 'services/events'
 
 const theme = createMuiTheme({
   typography: {
@@ -58,6 +59,7 @@ const Layout = styled.div`
     DoorService,
     UserService,
     AuthService,
+    EventService,
   ]
 })
 class App extends React.Component<AppProps, AppState> {
