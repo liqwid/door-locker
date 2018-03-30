@@ -7,6 +7,7 @@ import { DoorList } from 'containers/DoorList'
 import { UserList } from 'containers/UserList'
 import { EventList } from 'containers/EventList'
 import { DoorPage } from 'containers/Door'
+import { DoorForm } from 'containers/DoorForm'
 
 const Empty = () => <div />
 
@@ -21,8 +22,8 @@ export const Sidebar = ({ isAdmin, isTablet }: SidebarProps) => (
       <Route path='/doors' exact={true} component={DoorList}/>
       <Route path='/doors/:id/show' component={/*isTablet ? */DoorPage/* : DoorList*/}/>
       <Route path='/account' component={/*isTablet ? *//*UserForm*/Empty/* : Empty*/}/>
-      {isAdmin && <Route path='/doors/:id/edit' component={/*isTablet ? *//*DoorForm*/Empty/* : DoorList*/}/>}
-      {isAdmin && <Route path='/doors/add' component={/*isTablet ? *//*DoorForm*/Empty/* : DoorList*/}/>}
+      {isAdmin && <Route path='/doors/:id/edit' component={DoorForm}/>}
+      {isAdmin && <Route path='/doors/add' component={DoorForm}/>}
       {isAdmin && <Route path='/users' exact={true} component={UserList}/>}
       {isAdmin && <Route path='/users/:id/edit' component={/*isTablet ? *//*UserForm*/Empty/* : Empty*/}/>}
       {isAdmin && <Route path='/users/add' component={/*isTablet ? *//*UserForm*/Empty/* : Empty*/}/>}

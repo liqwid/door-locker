@@ -43,7 +43,6 @@ export interface DoorPageState {
 }
 
 const EditLink = styled(Link)`
-  margin-top: 16px !important;
   max-width: 80%;
 `
 
@@ -145,7 +144,7 @@ export class DoorPage extends React.Component<DoorPageProps, DoorPageState> {
           </Typography>
         }
         { !accessDenied && !opened &&
-          <OpenButton onClick={this.openDoor}>
+          <OpenButton onClick={error ? this.doorService.fetchItems : this.openDoor}>
             {name  && OPEN_TEXT}
             {error && REFRESH_TEXT}
           </OpenButton>

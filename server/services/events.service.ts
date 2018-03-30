@@ -1,8 +1,7 @@
 import { Event, EventORM } from 'models/event.model'
 import { extractRawData } from 'utils/orm'
-import { DoorORM, Door } from 'models/door.model'
+import { DoorORM } from 'models/door.model'
 import { managementClient } from 'services/auth.service'
-import { Instance } from 'sequelize'
 
 const NOT_FOUND_USER_NAME = 'Deleted user'
 const DOOR_OPEN_EVENT_TYPE = 'opened'
@@ -18,10 +17,6 @@ export function getEvents(): Promise<Event[]> {
   .then(([eventInstances, users]) =>
     eventInstances
     .map(extractRawData)
-    .map((eventWithDoor: Event & { door: Instance<Door> }): Event => ({
-      ...eventWithDoor,
-      door: extractRawData(eventWithDoor.door)
-    }))
     .map((event: Event): Event => {
       const eventUser = users.find((user) => user.user_id === event.userId)
       event.username = eventUser ? eventUser.username : NOT_FOUND_USER_NAME

@@ -1,4 +1,3 @@
-import { NotFoundError } from 'routing-controllers'
 import { Instance } from 'sequelize'
 
 import { User, UserData, UserORM } from 'models/user.model'
@@ -69,14 +68,14 @@ export async function addUser(userData: UserData): Promise<User> {
 }
 
 export async function updateUser(id: string, userData: UserData): Promise<User> {
-  await managementClient.updateUser({ id }, userData)
+  const user = await managementClient.updateUser({ id }, userData)
   
-  return UserORM.update({ isAdmin: userData.isAdmin }, { where: { id: <string> id }})
-  .then(([ count, users ]: [1, Instance<User>[]]): User => {
-    let [ updatedUser ] = users
-    if (!updatedUser) throw new NotFoundError(`instance with id ${id} was not found in db`)
-    return extractRawData(updatedUser)
-  })
+  await UserORM.update({ isAdmin: userData.isAdmin }, { where: { id: <string> id }})
+
+  const dbUser = await UserORM.findOne({ where: { id }})
+    .then(extractRawData)
+
+  return <User> { ...user, ...dbUser }
 }
 
 export async function deleteUser(id: string) {

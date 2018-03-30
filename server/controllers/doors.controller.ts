@@ -42,7 +42,7 @@ export class DoorsController {
   update(
     @Param('id') id: string,
     @Body() door: Door,
-  ): PromiseLike<Door> {
+  ): Promise<Door> {
     return updateDoor(id, door)
   }
 

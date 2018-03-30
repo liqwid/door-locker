@@ -7,6 +7,7 @@ import 'rxjs/add/operator/map'
 import 'rxjs/add/operator/catch'
 import 'rxjs/add/operator/mergeMapTo'
 import 'rxjs/add/operator/switchMap'
+import 'rxjs/add/operator/shareReplay'
 
 import { Injectable, Inject } from 'react.di'
 
@@ -54,9 +55,32 @@ export abstract class CollectionService<T extends CollectionItem> {
   /**
    * Initiates a fetch
    */
-  public fetchItems = () => {
+  public fetchItems = (): Observable<T[]> => {
     this.fetchHandle.next()
     if (!this.fetchedOnce) this.fetchedOnce = true
+
+    return this.getItemsStream()
+  }
+
+  public fetchItem(itemId: string): Observable<T> {
+    const requestStream = this.restApi.get({ url: `${this.endPoint}/${itemId}` })
+      .map(({ response }: AjaxResponse): T => response)
+      .shareReplay(1)
+    
+    // Adds item to the current state
+    requestStream.map((response: T) => {
+      const { status, items } = this.dataState.getValue()
+      return {
+        status,
+        items: items.map((item: T) => {
+          if (itemId === item.id) return response
+          return item
+        })
+      }
+    })
+    .subscribe(this.updateData)
+
+    return requestStream
   }
 
   /**
@@ -64,11 +88,13 @@ export abstract class CollectionService<T extends CollectionItem> {
    * @param {T} item Item to be added
    * @returns response observable
    */
-  public addItem = (item: T): Observable<AjaxResponse> => {
-    const requestStream = this.restApi.post({ url: this.endPoint, body: item })
+  public addItem = (itemData: Partial<T>): Observable<T> => {
+    const requestStream = this.restApi.post({ url: this.endPoint, body: itemData })
+      .map(({ response }: AjaxResponse): T => response)
+      .shareReplay(1)
     
     // Adds item to the current state
-    requestStream.map(({ response }: AjaxResponse) => {
+    requestStream.map((response: T) => {
       const { status, items } = this.dataState.getValue()
       return {
         status,
@@ -86,11 +112,13 @@ export abstract class CollectionService<T extends CollectionItem> {
    * @param {T} itemData item with some updated fields
    * @returns response observable
    */
-  public updateItem = (itemId: string, itemData: T): Observable<AjaxResponse> => {
+  public updateItem = (itemId: string, itemData: Partial<T>): Observable<T> => {
     const requestStream = this.restApi.put({ url: `${this.endPoint}/${itemId}`, body: itemData })
+      .map(({ response }: AjaxResponse): T => response)
+      .shareReplay(1)
     
     // Adds item to the current state
-    requestStream.map(({ response }: AjaxResponse) => {
+    requestStream.map((response: T) => {
       const { status, items } = this.dataState.getValue()
       return {
         status,
@@ -112,6 +140,7 @@ export abstract class CollectionService<T extends CollectionItem> {
    */
   public deleteItem = (itemId: string): Observable<AjaxResponse> => {
     const requestStream = this.restApi.delete({ url: `${this.endPoint}/${itemId}` })
+    .shareReplay(1)
     
     // Adds item to the current state
     requestStream.map(() => {

@@ -6,20 +6,15 @@ import 'rxjs/add/operator/takeUntil'
 
 import { Inject } from 'react.di'
 
-import List, { ListItem, ListItemText } from 'material-ui/List'
-import Divider from 'material-ui/Divider'
-
 import { SUCCESS, ERROR, LOADING, FetchMessage } from 'services/collection'
 import { EventService } from 'services/events'
 import { Door } from 'models/door'
 import { Event } from 'models/event'
-import { Loader } from 'components/Loader'
+import { List } from 'components/List'
 
 export const ERROR_TEXT: string = 'Failed to load events. Try again'
 
-export interface EventListProps {
-  style?: {}
-}
+export interface EventListProps {}
 
 export interface EventListState {
   events: Event[]
@@ -48,10 +43,6 @@ export class EventList extends React.Component<EventListProps, EventListState> {
     events: [],
     loading: true,
     error: false
-  }
-
-  constructor(props: EventListProps) {
-    super(props)
   }
 
   componentDidMount() {
@@ -89,25 +80,15 @@ export class EventList extends React.Component<EventListProps, EventListState> {
     const { events, loading, error } = this.state
 
     return (
-      <List style={{overflow: 'auto'}} component='nav'>
-        {
-          error && <ListItem button={true} onClick={this.eventService.fetchItems}>
-            <ListItemText primary={ERROR_TEXT} />
-            <Divider />
-          </ListItem>
-        }
-        {
-          loading && <Loader />
-        }
-        {
-          events.length > 0 && events.map(({ username, id, door, type, date }: Event) =>
-            <ListItem key={id}>
-              <ListItemText primary={getEventMessage(username, date, type, door)} />
-              <Divider />
-            </ListItem>
-          )
-        }
-      </List>
+      <List
+        loading={loading}
+        error={error}
+        onRefresh={this.eventService.fetchItems}
+        errorText={ERROR_TEXT}
+        items={events.map(({ username, id, door, type, date }: Event) => 
+          ({ id, text: getEventMessage(username, date, type, door) })
+        )}
+      />
     )
   }
 }

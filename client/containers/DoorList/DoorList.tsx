@@ -6,20 +6,15 @@ import 'rxjs/add/operator/takeUntil'
 
 import { Inject } from 'react.di'
 
-import List, { ListItem, ListItemText } from 'material-ui/List'
-import Divider from 'material-ui/Divider'
-
 import { SUCCESS, ERROR, LOADING, FetchMessage } from 'services/collection'
 import { DoorService } from 'services/doors'
 import { Door } from 'models/door'
-import { Loader } from 'components/Loader'
-import { Link } from 'components/Link'
+import { List } from 'components/List'
 
 export const ERROR_TEXT: string = 'Failed to load doors. Try again'
+export const ADD_TEXT: string = 'Add door'
 
-export interface DoorListProps {
-  style?: {}
-}
+export interface DoorListProps {}
 
 export interface DoorListState {
   doors: Door[]
@@ -35,10 +30,6 @@ export class DoorList extends React.Component<DoorListProps, DoorListState> {
     doors: [],
     loading: true,
     error: false
-  }
-
-  constructor(props: DoorListProps) {
-    super(props)
   }
 
   componentDidMount() {
@@ -74,29 +65,18 @@ export class DoorList extends React.Component<DoorListProps, DoorListState> {
 
   render() {
     const { doors, loading, error } = this.state
-
     return (
-      <List style={{overflow: 'auto'}} component='nav'>
-        {
-          error && <ListItem button={true} onClick={this.doorService.fetchItems}>
-            <ListItemText primary={ERROR_TEXT} />
-            <Divider />
-          </ListItem>
-        }
-        {
-          loading && <Loader />
-        }
-        {
-          doors.length > 0 && doors.map(({ name, id }: Door) =>
-            <Link to={`/doors/${id}/show`} key={id}>
-              <ListItem button={true}>
-                <ListItemText primary={name} />
-                <Divider />
-              </ListItem>
-            </Link>
-          )
-        }
-      </List>
+      <List
+        loading={loading}
+        error={error}
+        onRefresh={this.doorService.fetchItems}
+        errorText={ERROR_TEXT}
+        addLink='/doors/add'
+        addText={ADD_TEXT}
+        items={doors.map(({ id, name }: Door) => 
+          ({ id, text: name, link: `/doors/${id}/show` })
+        )}
+      />
     )
   }
 }

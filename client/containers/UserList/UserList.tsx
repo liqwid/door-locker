@@ -6,16 +6,13 @@ import 'rxjs/add/operator/takeUntil'
 
 import { Inject } from 'react.di'
 
-import List, { ListItem, ListItemText } from 'material-ui/List'
-import Divider from 'material-ui/Divider'
-
 import { SUCCESS, ERROR, LOADING, FetchMessage } from 'services/collection'
 import { UserService } from 'services/users'
 import { User } from 'models/user'
-import { Loader } from 'components/Loader'
-import { Link } from 'components/Link'
+import { List } from 'components/List'
 
 export const ERROR_TEXT: string = 'Failed to load users. Try again'
+export const ADD_TEXT: string = 'Add User'
 
 export interface UserListProps {
   style?: {}
@@ -35,10 +32,6 @@ export class UserList extends React.Component<UserListProps, UserListState> {
     users: [],
     loading: true,
     error: false
-  }
-
-  constructor(props: UserListProps) {
-    super(props)
   }
 
   componentDidMount() {
@@ -76,27 +69,17 @@ export class UserList extends React.Component<UserListProps, UserListState> {
     const { users, loading, error } = this.state
 
     return (
-      <List style={{overflow: 'auto'}} component='nav'>
-        {
-          error && <ListItem button={true} onClick={this.userService.fetchItems}>
-            <ListItemText primary={ERROR_TEXT} />
-            <Divider />
-          </ListItem>
-        }
-        {
-          loading && <Loader />
-        }
-        {
-          users.length > 0 && users.map(({ username, id }: User) =>
-            <Link to={`/users/${id}/edit`} key={id}>
-              <ListItem button={true}>
-                <ListItemText primary={username} />
-                <Divider />
-              </ListItem>
-            </Link>
-          )
-        }
-      </List>
+      <List
+        loading={loading}
+        error={error}
+        onRefresh={this.userService.fetchItems}
+        errorText={ERROR_TEXT}
+        addLink='/users/add'
+        addText={ADD_TEXT}
+        items={users.map(({ id, username }: User) => 
+          ({ id, text: username, link: `/users/${id}/edit` })
+        )}
+      />
     )
   }
 }

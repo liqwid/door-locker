@@ -33,7 +33,7 @@ export class UsersController {
   update(
     @Param('id') id: string,
     @Body() userData: UserData,
-  ): PromiseLike<User> {
+  ): Promise<User> {
     return updateUser(id, userData)
   }
 

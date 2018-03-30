@@ -1,11 +1,5 @@
+import * as React from 'react'
 import { CircularProgress } from 'material-ui/Progress'
+import { CenteredContent } from 'components/CenteredContent'
 
-import styled from 'styled-components'
-
-export const Loader = styled(CircularProgress)`
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translateX(-50%);
-  transform: translateY(-50%);
-`
+export const Loader = () => <CenteredContent><CircularProgress/></CenteredContent>

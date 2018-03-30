@@ -10,6 +10,7 @@ const BaseButton = styled(Button)`
   width: 360px !important;
   height: 64px !important;
   max-width: 100% !important;
+  margin-top: 16px !important;
 `
 
 export const DefaultButton = styled(BaseButton)`

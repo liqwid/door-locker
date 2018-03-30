@@ -15,7 +15,9 @@ const BASE_URL = '/api'
 
 @Injectable
 export class RestClient {
-  private baseHeaders: { Authorization?: string } = {}
+  private baseHeaders: { Authorization?: string, 'Content-Type': string  } = {
+    'Content-Type': 'application/json'
+  }
   
   constructor(
     @Inject protected auth: AuthService
@@ -35,7 +37,7 @@ export class RestClient {
   public post({ url, body, headers, progressSubscriber }: AjaxRequest): Observable<AjaxResponse> {
     return Observable.ajax({
       url: BASE_URL + url,
-      body,
+      body: JSON.stringify(body),
       headers: { ...headers, ...this.baseHeaders },
       method: 'post',
       crossDomain: true,
@@ -46,7 +48,8 @@ export class RestClient {
   
   public put({ url, body, headers }: AjaxRequest): Observable<AjaxResponse> {
     return Observable.ajax
-      .put(<string> BASE_URL + url, body, { ...headers, ...this.baseHeaders })
+      .put(<string> BASE_URL + url, JSON.stringify(body), { ...headers, ...this.baseHeaders })
+      .catch(this.onError)
   }
   
   public delete({ url, body, headers }: AjaxRequest): Observable<AjaxResponse> {
