@@ -11,25 +11,30 @@ export function getDoors(): PromiseLike<Door[]> {
 
 export async function getDoor(id: string): Promise<Door> {
   return DoorORM.findOne(
-  { where: { id }, include: [
+    { where: { id }, include: [
       { model: UserORM, as: 'users' }
     ]}
   )
   .then(extractRawData)
 }
 
-export function addDoor(door: Door): PromiseLike<Door> {
-  return DoorORM.create(door)
-  .then(extractRawData)
+export async function addDoor(doorData: Door): Promise<Door> {
+  const door = await DoorORM.create(doorData)
+
+  if (doorData.users) {
+    await door.setUsers(doorData.users.map(({ id: userId }) => userId))
+  }
+
+  return extractRawData(door)
 }
 
-export async function updateDoor(id: string, door: Door): Promise<Door> {
-  await DoorORM.update(door, { where: { id: <string> door.id }})
-  const user = await DoorORM.findOne(
+export async function updateDoor(id: string, doorData: Door): Promise<Door> {
+  await DoorORM.update(doorData, { where: { id: <string> doorData.id }})
+  const door = await DoorORM.findOne(
     { where: { id } }
   )
-  if (door.users) {
-    await user.setUsers(door.users.map(({ id: userId }) => userId))
+  if (doorData.users) {
+    await door.setUsers(doorData.users.map(({ id: userId }) => userId))
   }
 
   return getDoor(id)

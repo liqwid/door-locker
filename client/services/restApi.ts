@@ -52,6 +52,12 @@ export class RestClient {
       .catch(this.onError)
   }
   
+  public patch({ url, body, headers }: AjaxRequest): Observable<AjaxResponse> {
+    return Observable.ajax
+      .patch(<string> BASE_URL + url, JSON.stringify(body), { ...headers, ...this.baseHeaders })
+      .catch(this.onError)
+  }
+  
   public delete({ url, body, headers }: AjaxRequest): Observable<AjaxResponse> {
     return Observable.ajax
       .delete(<string> BASE_URL + url, { ...headers, ...this.baseHeaders })

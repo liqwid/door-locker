@@ -109,10 +109,10 @@ export abstract class CollectionService<T extends CollectionItem> {
   /**
    * Updates item
    * @param {string} itemId id of updated item
-   * @param {T} itemData item with some updated fields
+   * @param {Partial<T>} itemData item with some updated fields
    * @returns response observable
    */
-  public updateItem = (itemId: string, itemData: Partial<T>): Observable<T> => {
+  public updateItem(itemId: string, itemData: Partial<T>): Observable<T> {
     const requestStream = this.restApi.put({ url: `${this.endPoint}/${itemId}`, body: itemData })
       .map(({ response }: AjaxResponse): T => response)
       .shareReplay(1)
@@ -134,8 +134,35 @@ export abstract class CollectionService<T extends CollectionItem> {
   }
 
   /**
+   * Updates one or more item params
+   * @param {string} itemId id of updated item
+   * @param {Partial<T>} itemData data to be updated
+   * @returns response observable
+   */
+  public updateParams(itemId: string, itemData: Partial<T>): Observable<T> {
+    const requestStream = this.restApi.patch({ url: `${this.endPoint}/${itemId}`, body: itemData })
+      .map(({ response }: AjaxResponse): T => response)
+      .shareReplay(1)
+    
+    // Adds item to the current state
+    requestStream.map((response: Partial<T>) => {
+      const { status, items } = this.dataState.getValue()
+      return {
+        status,
+        items: items.map((item: T) => {
+          if (itemId === item.id) return Object.assign({}, item, response)
+          return item
+        })
+      }
+    })
+    .subscribe(this.updateData)
+
+    return requestStream
+  }
+  
+  /**
    * Deletes item
-   * @param {string} itemId  id of updated item
+   * @param {string} itemId  id of deleted item
    * @returns response observable
    */
   public deleteItem = (itemId: string): Observable<AjaxResponse> => {

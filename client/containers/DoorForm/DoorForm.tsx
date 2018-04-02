@@ -13,17 +13,17 @@ import { Inject } from 'react.di'
 import Typography from 'material-ui/Typography'
 import TextField from 'material-ui/TextField'
 
-import styled from 'styled-components'
+import { RouteComponentProps } from 'react-router'
 
 import { DoorService } from 'services/doors'
 import { UserService } from 'services/users'
 import { Door } from 'models/door'
 import { User } from 'models/user'
 import { Loader } from 'components/Loader'
-import { DefaultButton, PrimaryButton, SecondaryButton } from 'components/Button'
+import { PrimaryButton, SecondaryButton } from 'components/Button'
 import { MultiSelect } from 'components/MultiSelect'
 import { CenteredContent } from 'components/CenteredContent'
-import { RouteComponentProps } from 'react-router'
+import { FormContent, FormFields, RefreshButton } from 'components/Form'
 
 export const ERROR_TEXT: string = 'Failed to load door data'
 export const REFRESH_TEXT: string = 'Try again'
@@ -46,30 +46,6 @@ export interface DoorFormState extends Door {
   users: User[]
   allUsers: User[]
 }
-
-const OpenButton = styled(DefaultButton)`
-  max-width: 80% !important
-`
-
-const FormContent = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin: 0 16px 0 16px;
-  height: 100%;
-`
-
-const FormFields = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  >* {
-    width: 100%;
-  }
-  flex: 1;
-  overflow: auto;
-`
 
 const INITIAL_DATA = {
   id: '',
@@ -168,9 +144,9 @@ export class DoorForm extends React.Component<DoorFormProps, DoorFormState> {
           }
           {
             error && id &&
-            <OpenButton onClick={this.fetchData}>
+            <RefreshButton onClick={this.fetchData}>
               {REFRESH_TEXT}
-            </OpenButton>
+            </RefreshButton>
           }
         </CenteredContent>
       )

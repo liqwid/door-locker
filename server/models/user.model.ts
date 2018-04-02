@@ -1,7 +1,9 @@
-import { IsDefined, IsBoolean, IsEmail, MinLength } from 'class-validator'
+import { IsDefined, IsBoolean, IsEmail, MinLength, IsArray } from 'class-validator'
 import { STRING, BOOLEAN } from 'sequelize'
 import { sequelize } from 'services/sequelize'
 import { Identity, AppMetadata, UserMetadata } from 'auth0'
+import { Door } from 'models/door.model'
+import { MinLengthOrEmpty } from 'utils/validators'
 
 export class User {
   @IsDefined()
@@ -9,10 +11,21 @@ export class User {
 
   @IsBoolean()
   isAdmin: boolean
-  
+
+  @IsArray()
+  doors?: Door[]
+
+  // Auth0 params
+  @IsEmail()
   email?: string
-  email_verified?: boolean
+
+  @MinLength(5)
   username?: string
+
+  @MinLengthOrEmpty(8)
+  password?: string
+  
+  email_verified?: boolean
   phone_number?: string
   phone_verified?: boolean
   user_id?: string
@@ -31,21 +44,23 @@ export class User {
   blocked?: boolean
   given_name?: string
   family_name?: string
-  password?: string
 }
 
-export class UserData {
+export class NewUser {
   @IsEmail()
   email: string
 
-  @MinLength(8)
-  password: string
+  @MinLengthOrEmpty(8)
+  password?: string
 
   @MinLength(4)
   username: string
 
   @IsBoolean()
   isAdmin: boolean
+
+  @IsArray()
+  doors: Door[]
 }
 
 export const UserORM = sequelize.define('user', {

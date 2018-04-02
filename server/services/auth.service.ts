@@ -12,7 +12,7 @@ const AUDIENCE: string = <string> process.env.REACT_APP_AUDIENCE
 
 const MANAGING_DOMAN: string = <string> process.env.AUTH0_DOMAIN
 const MANAGING_SECRET: string = <string> process.env.AUTH0_CLIENT_SECRET
-const MANAGING_CLIENT_ID: string = <string> process.env.AUTH0_CLIENT_ID
+export const MANAGING_CLIENT_ID: string = <string> process.env.AUTH0_CLIENT_ID
 
 const AUTH_OPTIONS = {
   issuer: `https://${AUTH_DOMAIN}/`,

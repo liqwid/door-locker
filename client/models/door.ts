@@ -6,8 +6,3 @@ export interface Door {
   accessDenied?: boolean
   users?: User[]
 }
-
-export interface DoorData {
-  name: string
-  users: { id: string }[]
-}

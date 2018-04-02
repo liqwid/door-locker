@@ -1,9 +1,10 @@
 import { Instance } from 'sequelize'
 
-import { User, UserData, UserORM } from 'models/user.model'
+import { User, NewUser, UserORM } from 'models/user.model'
+import { DoorORM } from 'models/door.model'
 import { extractRawData } from 'utils/orm'
-import { managementClient } from './auth.service'
-import { User as AuthUser, CreateUserData as AuthCreateUserData } from 'auth0'
+import { managementClient, MANAGING_CLIENT_ID } from 'services/auth.service'
+import { User as AuthUser, CreateUserData } from 'auth0'
 
 // TODO: move to env variable
 const USER_CONNECTION_TYPE = 'Username-Password-Authentication'
@@ -36,46 +37,71 @@ export function getUsers(): Promise<User[]> {
 
 export function getUser(id: string): Promise<User> {
   return Promise.all([
-    UserORM.findOne({ where: { id }})
+    UserORM.findOne({ where: { id }, include: [
+      { model: DoorORM, as: 'doors' }
+    ]})
     .then(extractRawData),
     managementClient.getUser({ id })
   ])
   .then((userWrapper: ({}|User|AuthUser)[]): User => {
-    const dbUser: User = <User> userWrapper[0]
-    const authUser: AuthUser = <AuthUser> userWrapper[0]
-    const isAdmin: boolean = dbUser ? <boolean> dbUser.isAdmin : false
+    const [ dbUser, authUser ] = <[User, AuthUser]> userWrapper
+
+    if (!dbUser.isAdmin) dbUser.isAdmin = false
 
     return <User> {
       ...authUser,
-      id: authUser.user_id,
-      isAdmin
+      ...dbUser
     }
   })
 }
 
-export async function addUser(userData: UserData): Promise<User> {
-  const { isAdmin, email, username, password } = userData
-  const authUserData: AuthCreateUserData = {
+export async function addUser(userData: NewUser): Promise<User> {
+  const { isAdmin, doors, email, username, password } = userData
+  const authUserData: CreateUserData = {
     email, username, password, connection: USER_CONNECTION_TYPE
   }
-  const user = await managementClient.createUser(authUserData)
-  const { user_id } = user
-  const dbUser: User = { isAdmin, id: <string> user_id }
+  const authUser = await managementClient.createUser(authUserData)
+  const { user_id } = authUser
+  const user: User = { isAdmin, id: <string> user_id }
 
-  await UserORM.create(dbUser)
+  const dbUser: any = await UserORM.create(user)
+  if (doors) {
+    await dbUser.setDoors(doors.map(({ id: doorId }) => doorId))
+  }
 
-  return { ...dbUser, ...user }
+  return { ...user, ...authUser, doors }
 }
 
-export async function updateUser(id: string, userData: UserData): Promise<User> {
-  const user = await managementClient.updateUser({ id }, userData)
-  
-  await UserORM.update({ isAdmin: userData.isAdmin }, { where: { id: <string> id }})
+export async function updateUser(id: string, userData: User): Promise<User> {
+  const { isAdmin, doors, email, username, password } = userData
 
-  const dbUser = await UserORM.findOne({ where: { id }})
-    .then(extractRawData)
+  const authUser = await managementClient.getUser({ id })
 
-  return <User> { ...user, ...dbUser }
+  await UserORM.update({ isAdmin: isAdmin }, { where: { id: <string> id }})
+  const dbUser: any = await UserORM.findOne({ where: { id }})
+  if (doors) {
+    await dbUser.setDoors(doors.map(({ id: doorId }) => doorId))
+  }
+  if (email && email !== authUser.email) {
+    await managementClient.updateUser(
+      { id },
+      { email, connection: USER_CONNECTION_TYPE, client_id: MANAGING_CLIENT_ID }
+    )
+  }
+  if (username && username !== authUser.username) {
+    await managementClient.updateUser(
+      { id },
+      { username, connection: USER_CONNECTION_TYPE }
+    )
+  }
+  if (password) {
+    await managementClient.updateUser(
+      { id },
+      { password, connection: USER_CONNECTION_TYPE }
+    )
+  }
+
+  return <User> { ...authUser, ...extractRawData(dbUser) }
 }
 
 export async function deleteUser(id: string) {
