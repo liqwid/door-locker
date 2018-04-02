@@ -3,11 +3,10 @@ import { Subject } from 'rxjs/Subject'
 import { BehaviorSubject } from 'rxjs/BehaviorSubject'
 import { AjaxResponse } from 'rxjs/observable/dom/AjaxObservable'
 import 'rxjs/add/observable/of'
+import 'rxjs/add/operator/do'
 import 'rxjs/add/operator/map'
 import 'rxjs/add/operator/catch'
-import 'rxjs/add/operator/mergeMapTo'
 import 'rxjs/add/operator/switchMap'
-import 'rxjs/add/operator/shareReplay'
 
 import { Injectable, Inject } from 'react.di'
 
@@ -63,24 +62,18 @@ export abstract class CollectionService<T extends CollectionItem> {
   }
 
   public fetchItem(itemId: string): Observable<T> {
-    const requestStream = this.restApi.get({ url: `${this.endPoint}/${itemId}` })
+    return this.restApi.get({ url: `${this.endPoint}/${itemId}` })
       .map(({ response }: AjaxResponse): T => response)
-      .shareReplay(1)
-    
-    // Adds item to the current state
-    requestStream.map((response: T) => {
-      const { status, items } = this.dataState.getValue()
-      return {
-        status,
-        items: items.map((item: T) => {
-          if (itemId === item.id) return response
-          return item
+      .do((response: T) => {
+        const { status, items } = this.dataState.getValue()
+        this.updateData({
+          status,
+          items: items.map((item: T) => {
+            if (itemId === item.id) return response
+            return item
+          })
         })
-      }
-    })
-    .subscribe(this.updateData)
-
-    return requestStream
+      })
   }
 
   /**
@@ -91,17 +84,13 @@ export abstract class CollectionService<T extends CollectionItem> {
   public addItem = (itemData: Partial<T>): Observable<T> => {
     const requestStream = this.restApi.post({ url: this.endPoint, body: itemData })
       .map(({ response }: AjaxResponse): T => response)
-      .shareReplay(1)
-    
-    // Adds item to the current state
-    requestStream.map((response: T) => {
-      const { status, items } = this.dataState.getValue()
-      return {
-        status,
-        items: [ ...items, response ]
-      }
-    })
-    .subscribe(this.updateData)
+      .do((response: T) => {
+        const { status, items } = this.dataState.getValue()
+        this.updateData({
+          status,
+          items: [ ...items, response ]
+        })
+      })
 
     return requestStream
   }
@@ -113,51 +102,19 @@ export abstract class CollectionService<T extends CollectionItem> {
    * @returns response observable
    */
   public updateItem(itemId: string, itemData: Partial<T>): Observable<T> {
-    const requestStream = this.restApi.put({ url: `${this.endPoint}/${itemId}`, body: itemData })
+    return this.restApi.put({ url: `${this.endPoint}/${itemId}`, body: itemData })
       .map(({ response }: AjaxResponse): T => response)
-      .shareReplay(1)
-    
-    // Adds item to the current state
-    requestStream.map((response: T) => {
-      const { status, items } = this.dataState.getValue()
-      return {
-        status,
-        items: items.map((item: T) => {
-          if (itemId === item.id) return response
-          return item
+      // Adds item to the current state
+      .do((response: T) => {
+        const { status, items } = this.dataState.getValue()
+        this.updateData({
+          status,
+          items: items.map((item: T) => {
+            if (itemId === item.id) return response
+            return item
+          })
         })
-      }
-    })
-    .subscribe(this.updateData)
-
-    return requestStream
-  }
-
-  /**
-   * Updates one or more item params
-   * @param {string} itemId id of updated item
-   * @param {Partial<T>} itemData data to be updated
-   * @returns response observable
-   */
-  public updateParams(itemId: string, itemData: Partial<T>): Observable<T> {
-    const requestStream = this.restApi.patch({ url: `${this.endPoint}/${itemId}`, body: itemData })
-      .map(({ response }: AjaxResponse): T => response)
-      .shareReplay(1)
-    
-    // Adds item to the current state
-    requestStream.map((response: Partial<T>) => {
-      const { status, items } = this.dataState.getValue()
-      return {
-        status,
-        items: items.map((item: T) => {
-          if (itemId === item.id) return Object.assign({}, item, response)
-          return item
-        })
-      }
-    })
-    .subscribe(this.updateData)
-
-    return requestStream
+      })
   }
   
   /**
@@ -166,20 +123,15 @@ export abstract class CollectionService<T extends CollectionItem> {
    * @returns response observable
    */
   public deleteItem = (itemId: string): Observable<AjaxResponse> => {
-    const requestStream = this.restApi.delete({ url: `${this.endPoint}/${itemId}` })
-    .shareReplay(1)
-    
-    // Adds item to the current state
-    requestStream.map(() => {
-      const { status, items } = this.dataState.getValue()
-      return {
-        status,
-        items: [ ...items.filter(({ id }: T) => id !== itemId ) ]
-      }
-    })
-    .subscribe(this.updateData)
-
-    return requestStream
+    return this.restApi.delete({ url: `${this.endPoint}/${itemId}` })
+      // Adds item to the current state
+      .do(() => {
+        const { status, items } = this.dataState.getValue()
+        this.updateData({
+          status,
+          items: [ ...items.filter(({ id }: T) => id !== itemId ) ]
+        })
+      })
   }
 
   /**

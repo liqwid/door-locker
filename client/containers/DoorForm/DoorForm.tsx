@@ -4,7 +4,7 @@ import { AjaxError } from 'rxjs/observable/dom/AjaxObservable'
 import { Subject } from 'rxjs/Subject'
 import { Observable } from 'rxjs/Observable'
 import 'rxjs/add/observable/of'
-import 'rxjs/add/operator/withLatestFrom'
+import 'rxjs/add/observable/combineLatest'
 import 'rxjs/add/operator/filter'
 import 'rxjs/add/operator/takeUntil'
 
@@ -36,12 +36,17 @@ export const USERS_LABEL = 'Users with access'
 export const DELETE_TEXT = 'Delete door'
 export const SAVE_TEXT = 'Save door'
 
+export type DoorValidationErrors = {
+  [ key in keyof Door ]?: string
+}
+
 export interface DoorFormProps extends RouteComponentProps<{ id: string }> {}
 
 export interface DoorFormState extends Door {
   loading: boolean
   error: boolean
   id: string
+  validationErrors: DoorValidationErrors
   name: string
   users: User[]
   allUsers: User[]
@@ -59,9 +64,10 @@ export class DoorForm extends React.Component<DoorFormProps, DoorFormState> {
   @Inject userService: UserService
 
   unsubscribe$: Subject<void>
-  state = {
+  state: DoorFormState = {
     error: false,
     loading: true,
+    validationErrors: {},
     ...INITIAL_DATA
   }
 
@@ -92,7 +98,10 @@ export class DoorForm extends React.Component<DoorFormProps, DoorFormState> {
   fetchData = () => {
     this.setState({ loading: true, error: false, ...INITIAL_DATA })
 
-    this.userService.fetchItems().withLatestFrom(this.fetchDoor())
+    Observable.combineLatest(
+      this.userService.fetchItems(),
+      this.fetchDoor()
+    )
     .takeUntil(this.unsubscribe$)
     .catch((err: AjaxError) => {
       this.setState({ loading: false, error: true, ...INITIAL_DATA })
@@ -118,7 +127,13 @@ export class DoorForm extends React.Component<DoorFormProps, DoorFormState> {
       : doorService.addItem({ name, users })
 
     saveRequest.takeUntil(this.unsubscribe$)
-    .subscribe(({ id: doorId }) => this.props.history.push(`/doors/${doorId}/show`))
+    .subscribe(
+      ({ id: doorId }) => this.props.history.push(`/doors/${doorId}/show`),
+      (validationErrors: DoorValidationErrors) => {
+        this.setState({ validationErrors })
+        return Observable.throw(null)
+      }
+    )
   }
 
   deleteDoor = () => {
@@ -129,7 +144,7 @@ export class DoorForm extends React.Component<DoorFormProps, DoorFormState> {
   }
 
   render() {
-    const { loading, error, id, name, users, allUsers } = this.state
+    const { loading, error, id, name, users, allUsers, validationErrors } = this.state
 
     if (loading) return <Loader />
 
@@ -159,6 +174,8 @@ export class DoorForm extends React.Component<DoorFormProps, DoorFormState> {
             id='name'
             label={NAME_LABEL}
             value={name}
+            error={Boolean(validationErrors.name)}
+            helperText={validationErrors.name}
             onChange={({ target: { value }}) => this.setState({ name: value })}
             margin='normal'
           />
@@ -169,9 +186,9 @@ export class DoorForm extends React.Component<DoorFormProps, DoorFormState> {
             label={USERS_LABEL}
           />
         </FormFields>
-        <SecondaryButton onClick={this.deleteDoor}>
+        { id && <SecondaryButton onClick={this.deleteDoor}>
           {DELETE_TEXT}
-        </SecondaryButton>
+        </SecondaryButton>}
         <PrimaryButton onClick={this.saveDoor}>
           {SAVE_TEXT}
         </PrimaryButton>

@@ -1,11 +1,13 @@
 import { Observable } from 'rxjs/Observable'
-import { AjaxResponse, AjaxRequest } from 'rxjs/observable/dom/AjaxObservable'
+import { AjaxResponse, AjaxRequest, AjaxError } from 'rxjs/observable/dom/AjaxObservable'
 import 'rxjs/add/observable/dom/ajax'
+import 'rxjs/add/observable/throw'
 import 'rxjs/add/operator/catch'
 
 import { Injectable, Inject } from 'react.di'
 
 import { AuthService } from 'services/auth'
+import { formatValidationErrors } from 'services/validation'
 
 /**
  * API abstraction layer
@@ -52,12 +54,6 @@ export class RestClient {
       .catch(this.onError)
   }
   
-  public patch({ url, body, headers }: AjaxRequest): Observable<AjaxResponse> {
-    return Observable.ajax
-      .patch(<string> BASE_URL + url, JSON.stringify(body), { ...headers, ...this.baseHeaders })
-      .catch(this.onError)
-  }
-  
   public delete({ url, body, headers }: AjaxRequest): Observable<AjaxResponse> {
     return Observable.ajax
       .delete(<string> BASE_URL + url, { ...headers, ...this.baseHeaders })
@@ -69,10 +65,13 @@ export class RestClient {
     .subscribe((token) => this.baseHeaders.Authorization = `Bearer ${token}`)
   }
 
-  private onError = (response: AjaxResponse) => {
-    if (response.status === 401) {
+  private onError = (error: AjaxError) => {
+    if (error.status === 401) {
       this.auth.logout()
     }
-    return Observable.throw(response)
+    if (error.status === 400) {
+      return Observable.throw(formatValidationErrors(error.response))
+    }
+    return Observable.throw(error)
   }
 }

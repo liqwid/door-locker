@@ -7,6 +7,7 @@ import 'rxjs/add/observable/of'
 import 'rxjs/add/operator/withLatestFrom'
 import 'rxjs/add/operator/filter'
 import 'rxjs/add/operator/takeUntil'
+import 'rxjs/add/operator/catch'
 
 import { Inject } from 'react.di'
 
@@ -40,11 +41,16 @@ export const ADMIN_LABEL = 'Admin rights'
 export const DELETE_TEXT = 'Delete user'
 export const SAVE_TEXT = 'Save user'
 
+export type UserValidationErrors = {
+  [ key in keyof User ]?: string
+}
+
 export interface UserFormProps extends RouteComponentProps<{ id: string }> {}
 
 export interface UserFormState extends User {
   loading: boolean
   error: boolean
+  validationErrors: UserValidationErrors
   id: string
   isAdmin: boolean
   doors: Door[]
@@ -66,9 +72,10 @@ export class UserForm extends React.Component<UserFormProps, UserFormState> {
   @Inject doorService: DoorService
 
   unsubscribe$: Subject<void>
-  state = {
+  state: UserFormState = {
     error: false,
     loading: true,
+    validationErrors: {},
     ...INITIAL_DATA
   }
 
@@ -122,7 +129,13 @@ export class UserForm extends React.Component<UserFormProps, UserFormState> {
       : userService.addItem({ username, doors, email, password, isAdmin })
 
     saveRequest.takeUntil(this.unsubscribe$)
-    .subscribe(({ id: userId }) => this.props.history.push(`/users`))
+    .subscribe(
+      ({ id: userId }) => this.props.history.push(`/users`),
+      (validationErrors: UserValidationErrors) => {
+        this.setState({ validationErrors })
+        return Observable.throw(null)
+      }
+    )
   }
 
   deleteUser = () => {
@@ -133,7 +146,8 @@ export class UserForm extends React.Component<UserFormProps, UserFormState> {
   }
 
   render() {
-    const { loading, error, id, username, email, password, doors, allDoors, isAdmin } = this.state
+    const { loading, error, id, username, email, password, doors,
+      allDoors, isAdmin, validationErrors } = this.state
 
     if (loading) return <Loader />
 
@@ -162,12 +176,16 @@ export class UserForm extends React.Component<UserFormProps, UserFormState> {
           <TextField
             label={USERNAME_LABEL}
             value={username}
+            error={Boolean(validationErrors.username)}
+            helperText={validationErrors.username}
             onChange={({ target: { value }}) => this.setState({ username: value })}
             margin='normal'
           />
           <TextField
             label={EMAIL_LABEL}
             value={email}
+            error={Boolean(validationErrors.email)}
+            helperText={validationErrors.email}
             onChange={({ target: { value }}) => this.setState({ email: value })}
             margin='normal'
           />
@@ -175,6 +193,8 @@ export class UserForm extends React.Component<UserFormProps, UserFormState> {
             label={PASSWORD_LABEL}
             type='password'
             value={password}
+            error={Boolean(validationErrors.password)}
+            helperText={validationErrors.password}
             onChange={({ target: { value }}) => this.setState({ password: value })}
             margin='normal'
           />
@@ -196,9 +216,9 @@ export class UserForm extends React.Component<UserFormProps, UserFormState> {
             label={ADMIN_LABEL}
           />
         </FormFields>
-        <SecondaryButton onClick={this.deleteUser}>
+        { id && <SecondaryButton onClick={this.deleteUser}>
           {DELETE_TEXT}
-        </SecondaryButton>
+        </SecondaryButton>}
         <PrimaryButton onClick={this.saveUser}>
           {SAVE_TEXT}
         </PrimaryButton>

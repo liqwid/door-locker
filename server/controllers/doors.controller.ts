@@ -33,7 +33,7 @@ export class DoorsController {
 
   @Authorized([MANAGE_DOORS, MANAGE_USERS])
   @Post()
-  add(@Body() door: Door): PromiseLike<Door> {
+  add(@Body() door: Door): Promise<Door> {
     return addDoor(door)
   }
 

@@ -1,4 +1,4 @@
-import { IsDefined } from 'class-validator'
+import { MinLength } from 'class-validator'
 import { STRING, UUID, UUIDV4 } from 'sequelize'
 import { sequelize } from 'services/sequelize'
 import { User } from 'models/user.model'
@@ -6,7 +6,7 @@ import { User } from 'models/user.model'
 export class Door {
   id?: string
   
-  @IsDefined()
+  @MinLength(1)
   name: string
 
   users?: User[]
