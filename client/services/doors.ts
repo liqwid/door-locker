@@ -1,7 +1,5 @@
 import { Injectable } from 'react.di'
 
-import { Observable } from 'rxjs/Observable'
-
 import { CollectionService } from 'services/collection' 
 import { Door } from 'models/door'
 
@@ -16,14 +14,15 @@ export class DoorService extends CollectionService<Door> {
     this.restApi.post({
       url: `${this.endPoint}/open/${id}`
     })
-    .catch(() => this.onAccessDenied(id))
-    .subscribe(() => this.onDoorOpened(id))
+    .subscribe(
+      () => this.onDoorOpened(id),
+      () => this.onAccessDenied(id)
+    )
   }
 
   private onAccessDenied = (id: string) => {
     this.updateItemParam(id, 'accessDenied', true)
     setTimeout(() => this.updateItemParam(id, 'accessDenied', false), ACCESS_DENIED_TIMEOUT)
-    return Observable.of(null)
   }
 
   private onDoorOpened = (id: string) => {

@@ -4,8 +4,8 @@ import { DoorORM } from 'models/door.model'
 import { managementClient } from 'services/auth.service'
 
 const NOT_FOUND_USER_NAME = 'Deleted user'
-const DOOR_OPEN_EVENT_TYPE = 'opened'
-// const DOOR_ACCESS_DENIED_EVENT_TYPE = 'tried to access'
+export const DOOR_OPEN_EVENT_TYPE = 'opened'
+export const DOOR_ACCESS_DENIED_EVENT_TYPE = 'tried to access'
 
 export function getEvents(): Promise<Event[]> {
   return Promise.all([
@@ -26,10 +26,10 @@ export function getEvents(): Promise<Event[]> {
   )
 }
 
-export function logEvent(doorId: string, userId: string): PromiseLike<Event> {
+export function logEvent(doorId: string, userId: string, type: string): PromiseLike<Event> {
   return EventORM.create({
-    type: DOOR_OPEN_EVENT_TYPE,
     date: Date.now(),
+    type,
     doorId,
     userId,
   })
