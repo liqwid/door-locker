@@ -6,7 +6,6 @@ import { Inject } from 'react.di'
 
 import BottomNavigation, { BottomNavigationAction } from 'material-ui/BottomNavigation'
 import Lock from 'material-ui-icons/Lock'
-import Person from 'material-ui-icons/Person'
 import People from 'material-ui-icons/People'
 import ExitToApp from 'material-ui-icons/ExitToApp'
 import AssignmentLate from 'material-ui-icons/AssignmentLate'
@@ -32,7 +31,6 @@ export class BottomNavComponent extends React.Component<BottomNavProps & RouteCo
 
     return (
       <BottomNavigation value={selected} onChange={this.handleChange}>
-        <BottomNavigationAction style={{ minWidth: 0 }} label='Acount' value='account' icon={<Person />}/>
         { isAdmin &&
           <BottomNavigationAction style={{ minWidth: 0 }} label='Users' value='users' icon={<People />}/>
         }

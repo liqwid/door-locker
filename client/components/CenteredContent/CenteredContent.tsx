@@ -6,4 +6,5 @@ export const CenteredContent = styled.div`
   justify-content: center;
   align-items: center;
   height: 100%;
+  position: relative;
 `

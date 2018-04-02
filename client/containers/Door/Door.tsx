@@ -6,6 +6,8 @@ import 'rxjs/add/operator/takeUntil'
 
 import { Inject } from 'react.di'
 
+import { RouteComponentProps } from 'react-router'
+
 import Typography from 'material-ui/Typography'
 import KeyboardArrowLeft from 'material-ui-icons/KeyboardArrowLeft'
 
@@ -26,12 +28,8 @@ export const EDIT_TEXT: string = 'Edit Door'
 export const ACCESS_DENIED_TEXT: string = 'Access denied'
 export const OPENED_TEXT: string = 'Door opened'
 
-export interface DoorPageProps {
-  match: {
-    params: {
-      id: string
-    }
-  }
+export interface DoorPageProps extends RouteComponentProps<{ id: string }> {
+  isAdmin: boolean
 }
 
 export interface DoorPageState {
@@ -122,7 +120,7 @@ export class DoorPage extends React.Component<DoorPageProps, DoorPageState> {
 
   render() {
     const { name, loading, error, accessDenied, opened } = this.state
-    const { id } = this.props.match.params
+    const { isAdmin, match: { params: { id }}} = this.props
 
     return (
       <CenteredContent>
@@ -150,7 +148,7 @@ export class DoorPage extends React.Component<DoorPageProps, DoorPageState> {
           </OpenButton>
         }
         {
-          name && <EditLink to={`/doors/${id}/edit`}>
+          isAdmin && name && <EditLink to={`/doors/${id}/edit`}>
             <PrimaryButton>
               {EDIT_TEXT}
             </PrimaryButton>

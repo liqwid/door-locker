@@ -14,7 +14,9 @@ import { List } from 'components/List'
 export const ERROR_TEXT: string = 'Failed to load doors. Try again'
 export const ADD_TEXT: string = 'Add door'
 
-export interface DoorListProps {}
+export interface DoorListProps {
+  isAdmin: boolean
+}
 
 export interface DoorListState {
   doors: Door[]
@@ -65,13 +67,15 @@ export class DoorList extends React.Component<DoorListProps, DoorListState> {
 
   render() {
     const { doors, loading, error } = this.state
+    const { isAdmin } = this.props
+    
     return (
       <List
         loading={loading}
         error={error}
         onRefresh={this.doorService.fetchItems}
         errorText={ERROR_TEXT}
-        addLink='/doors/add'
+        addLink={isAdmin ? '/doors/add' : ''}
         addText={ADD_TEXT}
         items={doors.map(({ id, name }: Door) => 
           ({ id, text: name, link: `/doors/${id}/show` })

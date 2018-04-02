@@ -17,7 +17,7 @@ const CLIENT_ID = <string> process.env.REACT_APP_AUTH0_CLIENT_ID
 const REDIRECT = `${process.env.REACT_APP_URL}callback`
 const AUDIENCE = <string> process.env.REACT_APP_AUDIENCE
 const RESPONSE_TYPE = 'token id_token'
-const SCOPE = 'openid'
+const SCOPE = `openid profile email roles`
 
 const HOME_ROUTE = '/'
 
@@ -29,24 +29,31 @@ export const LOADING: LOADING = 'loading'
 export const AUTHENTICATED: AUTHENTICATED = 'authenticated'
 export const UNAUTHENTICATED: UNAUTHENTICATED = 'unauthenticated'
 
+const LOGIN_OPTIONS = {
+  domain: CLIENT_DOMAIN,
+  clientID: CLIENT_ID,
+  redirectUri: REDIRECT,
+  audience: AUDIENCE,
+  responseType: RESPONSE_TYPE,
+  scope: SCOPE
+}
+
+export interface UserProfile extends auth0.Auth0UserProfile {
+  isAdmin: boolean
+}
+
 @Injectable
 export class AuthService {
   private authState: BehaviorSubject<AUTH_STATUS> = new BehaviorSubject(LOADING)
   private accessTokenState: BehaviorSubject<string> = new BehaviorSubject('')
+  private currentUserDataState: BehaviorSubject<UserProfile | null> = new BehaviorSubject(null)
   private tokenRenewalTimeout: number
   
-  private auth0 = new auth0.WebAuth({
-    domain: CLIENT_DOMAIN,
-    clientID: CLIENT_ID,
-    redirectUri: REDIRECT,
-    audience: AUDIENCE,
-    responseType: RESPONSE_TYPE,
-    scope: SCOPE
-  })
+  private auth = new auth0.WebAuth(LOGIN_OPTIONS)
 
   public initialize() {
     if (/access_token|id_token|error/.test(window.location.hash)) {
-      this.auth0.parseHash(this.onAuth)
+      this.auth.parseHash(this.onAuth)
       return
     }
 
@@ -59,6 +66,10 @@ export class AuthService {
 
   public getAcessTokenStream() {
     return this.accessTokenState.asObservable()
+  }
+
+  public getCurrentUserDataStream() {
+    return this.currentUserDataState.asObservable()
   }
 
   public logout = () => {
@@ -77,11 +88,11 @@ export class AuthService {
   }
 
   public login = () => {
-    this.auth0.authorize()
+    this.auth.authorize()
   }
 
   public renewToken() {
-    this.auth0.checkSession({}, this.onAuth)
+    this.auth.checkSession({}, this.onAuth)
   }
 
   private onAuth = (err: auth0.Auth0Error | null, authResult: auth0.Auth0DecodedHash) => {
@@ -110,8 +121,9 @@ export class AuthService {
 
     const accessToken = localStorage.getItem(ACCESS_TOKEN_KEY) || ''
     
-    this.authState.next(AUTHENTICATED)
     this.accessTokenState.next(accessToken)
+    this.authState.next(AUTHENTICATED)
+    this.updateCurrentUser(accessToken)
   }
 
   private scheduleRenewal() {
@@ -126,5 +138,15 @@ export class AuthService {
       },
       delay
     )
+  }
+
+  private updateCurrentUser(accessToken: string) {
+    this.auth.client.userInfo(accessToken, (err, user) => {
+      if (err) this.logout()
+      this.currentUserDataState.next({
+        ...user,
+        isAdmin: user[`${AUDIENCE}roles`].includes('admin')
+      })
+    })
   }
 }

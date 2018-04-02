@@ -7,6 +7,8 @@ const Media = require('react-media').default
 import styled from 'styled-components'
 
 import { Subject } from 'rxjs/Subject'
+import 'rxjs/add/operator/filter'
+import 'rxjs/add/operator/takeUntil'
 
 import { DARK_BLUE_GRAY, TEAL, RED_ORANGE } from 'styles/colors'
 import { TABLET_VERTICAL } from 'styles/media'
@@ -17,7 +19,6 @@ import { UserService } from 'services/users'
 import { history } from 'services/history'
 import { AuthService, AUTH_STATUS, LOADING, AUTHENTICATED } from 'services/auth'
 
-import { Main } from 'containers/Main'
 import { Sidebar } from 'containers/Sidebar'
 import { Loader } from 'components/Loader'
 import { EventService } from 'services/events'
@@ -47,6 +48,7 @@ const theme = createMuiTheme({
 interface AppProps {}
 interface AppState {
   authStatus: AUTH_STATUS
+  isAdmin: boolean
 }
 
 const Layout = styled.div`
@@ -67,13 +69,19 @@ class App extends React.Component<AppProps, AppState> {
   unsubscribe$: Subject<void> = new Subject()
 
   state = {
-    authStatus: LOADING
+    authStatus: LOADING,
+    isAdmin: false
   }
 
   componentDidMount() {    
     this.auth.getAuthStatusStream()
     .takeUntil(this.unsubscribe$)
     .subscribe((authStatus) => this.setState({ authStatus }))
+
+    this.auth.getCurrentUserDataStream()
+    .takeUntil(this.unsubscribe$)
+    .filter(Boolean)
+    .subscribe(({ isAdmin }) => this.setState({ isAdmin }))
 
     this.auth.initialize()
   }
@@ -83,7 +91,7 @@ class App extends React.Component<AppProps, AppState> {
   }
   
   render() {
-    const { authStatus } = this.state
+    const { authStatus, isAdmin } = this.state
     
     return (
       <MuiThemeProvider theme={theme}>
@@ -100,12 +108,7 @@ class App extends React.Component<AppProps, AppState> {
                       {/**
                         *  Side-menu for desktop/Only screen for mobile
                         */
-                        <Sidebar isAdmin={true} isTablet={matches} />
-                      }
-                      {/**
-                        *  Main screen for desktop
-                        */
-                        !matches &&  <Main isAdmin={true} />
+                        <Sidebar isAdmin={isAdmin} isTablet={matches} />
                       }
                     </Layout>
                   )}
