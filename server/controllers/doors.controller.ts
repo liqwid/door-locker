@@ -21,7 +21,7 @@ export class DoorsController {
     return getDoor(id)
   }
 
-  @Authorized(MANAGE_USERS)
+  @Authorized()
   @Post('/open/:id')
   async open(
     @Req() request: Request,
